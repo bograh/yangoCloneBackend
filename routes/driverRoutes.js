@@ -1,15 +1,15 @@
 const express = require('express');
-const router = express.Router();
 const {
   getDriverEarnings,
   receiveRideRequest,
   trackRideStatus,
   respondToRideRequest
 } = require('../controllers/driverController');
+const router = express.Router();
 
 router.get('/earnings/:driverId', getDriverEarnings);
-router.get('/ride-requests/:driverId', receiveRideRequest);
-router.get('/ride-status/:driverId/:rideId', trackRideStatus);
-router.post('/ride-requests/:driverId/:rideId/respond', respondToRideRequest);
+router.get('/requests/:driverId', receiveRideRequest);
+router.get('/status/:driverId/:rideId', trackRideStatus);
+router.post('/respond/:driverId/:rideId', respondToRideRequest);
 
 module.exports = router;

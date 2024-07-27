@@ -5,6 +5,7 @@ const serviceAccount = require("./serviceAccount.json");
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://yangoclone-7d382.firebaseio.com"
   });
 }
 

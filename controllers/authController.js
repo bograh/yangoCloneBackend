@@ -38,6 +38,46 @@ async function registerUser(req, res) {
   }
 }
 
+// Driver Registration
+async function registerDriver(req, res) {
+  const { phone, firstName, lastName, email, licenseNumber, numberPlate, vehicleType, color } = req.body;
+  try {
+    // Check if the driver is already registered
+    const driverSnapshot = await db.collection('drivers').where('phone', '==', phone).get();
+
+    if (!driverSnapshot.empty) {
+      return res.status(400).json({ message: 'Driver already registered' });
+    }
+
+    // Register new driver with Firebase Authentication
+    const driverRecord = await admin.auth().createUser({
+      phoneNumber: phone,
+      email,
+      displayName: `${firstName} ${lastName}`,
+    });
+
+    // Store additional driver details in Firestore
+    await db.collection('drivers').doc(driverRecord.uid).set({
+      phone,
+      firstName,
+      lastName,
+      email,
+      licenseNumber,
+      numberPlate,
+      vehicleType,
+      color,
+      createdAt: admin.firestore.Timestamp.now()
+    });
+
+    // Send OTP
+    const otpData = await sendOTP(phone);
+    res.status(200).json({ requestId: otpData.requestId });
+  } catch (error) {
+    console.error('Error registering driver:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+}
+
 // User Login
 async function loginUser(req, res) {
   const { phone } = req.body;
@@ -60,7 +100,7 @@ async function loginUser(req, res) {
 
 // Verify OTP and Authenticate
 async function verifyUserOTP(req, res) {
-  const { requestId, code } = req.body;
+  const { phone, requestId, code } = req.body;
   try {
     // Verify OTP
     const verificationResult = await verifyOTP(requestId, code);
@@ -106,6 +146,7 @@ async function logout(req, res) {
 
 module.exports = {
   registerUser,
+  registerDriver,
   loginUser,
   verifyUserOTP,
   resendUserOTP,

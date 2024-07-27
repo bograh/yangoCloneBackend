@@ -2,8 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const { admin, db } = require('./config/firebaseConfig'); 
-const { sendOTP, verifyOTP, resendOTP } = require('./utils/otpHelper');
 const authRoutes = require('./routes/authRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const otpRoutes = require('./routes/otpRoutes');
+const driverRoutes = require('./routes/driverRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Initialize Express application
 const app = express();
@@ -20,8 +23,12 @@ const otpRateLimiter = rateLimit({
 
 app.use('/api/auth', otpRateLimiter);
 
-// Use auth routes
+// Use routes
 app.use('/api/auth', authRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/otp', otpRoutes);
+app.use('/api/drivers', driverRoutes);
+app.use('/api/users', userRoutes);
 
 // Example of how to handle 404 errors
 app.use((req, res, next) => {
