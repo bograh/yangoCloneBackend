@@ -1,110 +1,96 @@
 const express = require('express');
 const router = express.Router();
-const bookingController = require('../controllers/bookingController');
+const {
+  getAllBookings,
+  getAllUserBookings,
+  createBooking,
+  getBookingsByDriverId,
+  getBookingsByUserId,
+  getBooking,
+  submitFeedback,
+  getFeedbackForBooking,
+  getAllFeedback
+
+} = require("../controllers/bookingController");
+
+
+//uid = user id
+//did = driver id
+//bid = booking id
 
 // Create a new booking
-router.post('/book/:userId/:driverId', async (req, res) => {
-    const { userLocation } = req.body;
-    const { userId, driverId } = req.params;
-  
-    if (!userLocation) {
-      return res.status(400).json({ error: "Missing userLocation in request body" });
-    }
-  
-    const result = await bookingController.createBooking(userId, driverId, userLocation);
-  
-    if (result.error) {
-      return res.status(400).json(result);
-    }
-  
-    res.json(result);
-  });
-// Get a particular booking by its ID
-router.get('/booking/:bookingId', async (req, res) => {
-  const { bookingId } = req.params;
-  const result = await bookingController.getBooking(bookingId);
-  if (result.error) {
-    return res.status(404).json({ error: result });
-  }
-  return res.status(200).json(result);
+
+router.post("/create/:uid/:did", async (req, res) => {
+  const userId = req.params.uid;
+  const driverId = req.params.did;
+  const fare = req.body.fare;
+  const notes = req.body.notes;
+  const pickupAddress = req.body.pickupAddress;
+  const dropOffAddress = req.body.dropOffAddress;
+
+  const createBookingRequest = await createBooking(
+    userId,
+    driverId,
+    fare,
+    notes,
+    pickupAddress,
+    dropOffAddress
+  );
+  res.json(createBookingRequest);
 });
 
-// Get all bookings
-router.get('/bookings', async (req, res) => {
-  const result = await bookingController.getAllBookings();
-  if (result.error) {
-    return res.status(500).json({ error: result });
-  }
-  return res.status(200).json(result);
+
+router.get("/get/:bid", async (req, res) => {
+  const bookingId = req.params.bid;
+  const getBookingInfo = await getBooking(bookingId);
+  res.json(getBookingInfo);
 });
 
-// Get all bookings for a specific user
-router.get('/user/:userId/bookings', async (req, res) => {
-  const { userId } = req.params;
-  const result = await bookingController.getAllUserBookings(userId);
-  if (result.error) {
-    return res.status(404).json({ error: result });
-  }
-  return res.status(200).json(result);
+router.get("/getAll", async (req, res) => {
+  const getAll = await getAllBookings();
+  res.json(getAll);
 });
 
-// Submit feedback
-router.post('/feedback/:bookingId', async (req, res) => {
-  const { bookingId } = req.params;
-  const { rating, comment } = req.body;
-  const result = await bookingController.submitFeedback(bookingId, rating, comment);
-  if (result.error) {
-    return res.status(400).json({ error: result });
-  }
-  return res.status(201).json(result);
+router.get("/getAllUser/:uid", async (req, res) => {
+  const userId = req.params.uid;
+  const getAllUserBook = await getAllUserBookings(userId);
+  res.json(getAllUserBook);
 });
 
-// Get feedback for a booking
-router.get('/booking/:bookingId/feedback', async (req, res) => {
-  const { bookingId } = req.params;
-  const result = await bookingController.getFeedbackForBooking(bookingId);
-  if (result.error) {
-    return res.status(404).json({ error: result });
-  }
-  return res.status(200).json(result);
+router.get('/getBookingsByDriverId/:driverId/bookings', async (req, res) => {
+  const driverId = req.params.driverId;
+
+  const bookings = await getBookingsByDriverId(driverId);
+
+  res.status(200).json(bookings);
 });
 
-// Get all feedback
-router.get('/feedback', async (req, res) => {
-  const result = await bookingController.getAllFeedback();
-  if (result.error) {
-    return res.status(500).json({ error: result });
-  }
-  return res.status(200).json(result);
+router.get('/getBookingsByUserId/:userId/bookings', async (req, res) => {
+  const userId = req.params.userId;
+
+  const bookings = await getBookingsByUserId(userId);
+
+  res.status(200).json(bookings);
 });
 
-// Get pickups by status
-router.get('/pickups/status/:status', async (req, res) => {
-  const { status } = req.params;
-  const result = await bookingController.getPickupByStatus(status);
-  if (result.error) {
-    return res.status(500).json({ error: result });
-  }
-  return res.status(200).json(result);
+router.post("/setFeedback", async (req, res) => {
+  const bookingId = req.body.bookingId;
+  const rating = req.body.rating;
+  const comment = req.body.comment;
+  const setFeedback = await submitFeedback(bookingId, rating, comment);
+  res.json(setFeedback);
 });
 
-// Find available taxis
-router.get('/taxis/available', async (req, res) => {
-  const result = await bookingController.findAvailableTaxis();
-  if (result.error) {
-    return res.status(500).json({ error: result });
-  }
-  return res.status(200).json(result);
+router.get("/getFeedback/:bid", async (req, res) => {
+  const bookingId = req.params.bid;
+  const getFeedback = await getFeedbackForBooking(bookingId);
+  res.json(getFeedback);
 });
 
-// Get user booking field
-router.get('/user/:userId/booking', async (req, res) => {
-  const { userId } = req.params;
-  const result = await bookingController.getUserBookingField(userId);
-  if (result.error) {
-    return res.status(404).json({ error: result });
-  }
-  return res.status(200).json(result);
+router.get("/getAllFeedback", async (req, res) => {
+  const getFeedback = await getAllFeedback();
+  res.json(getFeedback);
 });
 
 module.exports = router;
+

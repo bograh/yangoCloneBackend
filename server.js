@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
-const { admin, db } = require('./config/firebaseConfig'); 
 const authRoutes = require('./routes/authRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const otpRoutes = require('./routes/otpRoutes');
